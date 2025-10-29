@@ -66,3 +66,5 @@ if (process.env.NODE_ENV !== "production") {
     console.log(`🚀 Serveur local démarré sur le port ${PORT}`);
   });
 }
+
+module.exports = app;

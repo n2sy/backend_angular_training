@@ -3,11 +3,41 @@ const mongoose = require("mongoose");
 const cvRoutes = require("./routes/cv");
 const authRoutes = require("./routes/auth");
 const avatarRoutes = require("./routes/avatar");
+const swaggerUi = require("swagger-ui-express");
+const swaggerJsdoc = require("swagger-jsdoc");
 const cors = require("cors");
-const { swaggerUi, specs } = require("./swagger");
 require("dotenv").config();
 
 const app = express();
+
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Candidats API For Angular App",
+      version: "1.0.0",
+      description: "Documentation de mon API REST",
+    },
+    servers: [
+      {
+        url: "http://localhost:3000",
+        description: "Serveur de développement",
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT", // facultatif mais conseillé
+        },
+      },
+    },
+  },
+  // Chemins vers les fichiers contenant les annotations
+  apis: ["./routes/*.js", "./models/*.js"], // Ajuste selon ta structure
+};
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // Middleware de base
 app.use(express.json());
@@ -60,7 +90,7 @@ app.get("/", (req, res) => {
 });
 
 // Routes statiques et API
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/avatars", express.static("public"));
 app.use("/images/upload", avatarRoutes);
 app.use("/auth", authRoutes);

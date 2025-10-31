@@ -6,6 +6,7 @@ const avatarRoutes = require("./routes/avatar");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config();
 
 const app = express();
@@ -35,7 +36,11 @@ const specs = {
     },
   },
   // Chemins vers les fichiers contenant les annotations
-  apis: ["./routes/*.js", "./models/*.js"], // Ajuste selon ta structure
+  apis: [
+    path.join(__dirname, "./routes/*.js"),
+    path.join(__dirname, "./models/*.js"),
+    path.join(__dirname, "routes", "cv.routes.js"),
+  ], // Ajuste selon ta structure
 };
 const swaggerOptions = {
   customCssUrl:

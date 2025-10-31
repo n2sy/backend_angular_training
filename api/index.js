@@ -15,12 +15,12 @@ const swaggerOptions = {
     openapi: "3.0.0",
     info: {
       title: "Candidats API For Angular App",
-      version: "1.0.0",
+      version: "3.0.0",
       description: "Documentation de mon API REST",
     },
     servers: [
       {
-        url: "http://localhost:3000",
+        url: "https://backendangulartrainingvercel.vercel.app",
         description: "Serveur de développement",
       },
     ],

@@ -60,7 +60,7 @@ app.get("/", (req, res) => {
 });
 
 // Routes statiques et API
-app.use("/api", swaggerUi.serve, swaggerUi.setup(specs));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 app.use("/avatars", express.static("public"));
 app.use("/images/upload", avatarRoutes);
 app.use("/auth", authRoutes);

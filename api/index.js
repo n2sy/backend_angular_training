@@ -10,7 +10,7 @@ require("dotenv").config();
 
 const app = express();
 
-const swaggerOptions = {
+const specs = {
   definition: {
     openapi: "3.0.0",
     info: {
@@ -37,7 +37,15 @@ const swaggerOptions = {
   // Chemins vers les fichiers contenant les annotations
   apis: ["./routes/*.js", "./models/*.js"], // Ajuste selon ta structure
 };
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
+const swaggerOptions = {
+  customCssUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.5/swagger-ui.min.css",
+  customJs: [
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.5/swagger-ui-bundle.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.5/swagger-ui-standalone-preset.js",
+  ],
+};
+const swaggerSpec = swaggerJsdoc(specs);
 
 // Middleware de base
 app.use(express.json());
@@ -90,7 +98,11 @@ app.get("/", (req, res) => {
 });
 
 // Routes statiques et API
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, swaggerOptions)
+);
 app.use("/avatars", express.static("public"));
 app.use("/images/upload", avatarRoutes);
 app.use("/auth", authRoutes);

@@ -36,5 +36,37 @@ router.post(
   avatarCtrl.postAvatar
 );
 
+/**
+ * @swagger
+ * /images/upload/cloud:
+ *   post:
+ *     summary: Upload l'avatar d'un candidat sur Cloudinary
+ *     tags: [Candidats]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - avatar
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Avatar uploadé avec succès
+ *       400:
+ *         description: Fichier manquant ou invalide
+ *       401:
+ *         description: Non autorisé
+ *       404:
+ *         description: Candidat non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
 router.post("/cloud", handler);
 module.exports = router;

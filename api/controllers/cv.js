@@ -2,6 +2,7 @@ const Personne = require("../models/person");
 const _ = require("lodash");
 const fs = require("fs");
 const path = require("path");
+const mongoose = require("mongoose");
 
 exports.getAllcandidats = async (req, res, next) => {
   const filter = req.query.filter;

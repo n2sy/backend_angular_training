@@ -17,6 +17,9 @@ exports.getAllcandidats = async (req, res, next) => {
 };
 exports.getCandidat = (req, res, next) => {
   const pId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "ID invalide" });
+  }
 
   Personne.findById(pId)
     .then((p) => {
@@ -28,7 +31,7 @@ exports.getCandidat = (req, res, next) => {
       res.status(200).json(p);
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 exports.createCandidat = (req, res, next) => {
@@ -53,6 +56,9 @@ exports.createCandidat = (req, res, next) => {
 };
 exports.updateCandidat = (req, res, next) => {
   const pId = req.params["id"];
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "ID invalide" });
+  }
 
   Personne.findById(pId)
     .then((p) => {
@@ -137,7 +143,9 @@ exports.getAllrecrues = async (req, res, next) => {
 };
 exports.deleteCandidat = (req, res, next) => {
   const pId = req.params["id"];
-  console.log(pId);
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "ID invalide" });
+  }
 
   Personne.findByIdAndDelete(pId)
     .then((p) => {

@@ -32,6 +32,8 @@ router.get("/candidats", cvCtrl.getAllcandidats);
  *   get:
  *     summary: Récupère toutes les recrues
  *     tags: [Recrues]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Liste des recrues
@@ -41,10 +43,14 @@ router.get("/candidats", cvCtrl.getAllcandidats);
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Person'
+ *       401:
+ *         description: Token manquant ou invalide
+ *       403:
+ *         description: Token expiré
  *       500:
  *         description: Erreur interne du serveur
  */
-router.get("/recrues", cvCtrl.getAllrecrues);
+router.get("/recrues", isAuth, cvCtrl.getAllrecrues);
 
 //récupérer les infos sur un SEUL Candidat
 /**
@@ -276,6 +282,8 @@ router.put("/candidats/:id", isAuth, cvCtrl.updateCandidat);
  *   patch:
  *     summary: Ajouter un candidat comme recrue
  *     tags: [Recrues]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -298,12 +306,16 @@ router.put("/candidats/:id", isAuth, cvCtrl.updateCandidat);
  *                   $ref: '#/components/schemas/Person'
  *       400:
  *         description: ID invalide
+ *       401:
+ *         description: Token manquant ou invalide
+ *       403:
+ *         description: Token expiré
  *       404:
  *         description: Candidat non trouvé
  *       500:
  *         description: Erreur interne du serveur
  */
-router.patch("/candidats/ajouter-recrue/:id", cvCtrl.ajouterRecrue);
+router.patch("/candidats/ajouter-recrue/:id", isAuth, cvCtrl.ajouterRecrue);
 
 //Virer une recrue
 /**
@@ -312,6 +324,8 @@ router.patch("/candidats/ajouter-recrue/:id", cvCtrl.ajouterRecrue);
  *   patch:
  *     summary: Virer une recrue (remettre comme simple candidat)
  *     tags: [Recrues]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -334,12 +348,16 @@ router.patch("/candidats/ajouter-recrue/:id", cvCtrl.ajouterRecrue);
  *                   $ref: '#/components/schemas/Person'
  *       400:
  *         description: ID invalide
+ *       401:
+ *         description: Token manquant ou invalide
+ *       403:
+ *         description: Token expiré
  *       404:
  *         description: Candidat non trouvé
  *       500:
  *         description: Erreur interne du serveur
  */
-router.patch("/candidats/virer-recrue/:id", cvCtrl.virerRecrue);
+router.patch("/candidats/virer-recrue/:id", isAuth, cvCtrl.virerRecrue);
 
 //suppression d'un Candidat
 /**

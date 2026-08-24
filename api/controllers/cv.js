@@ -1,43 +1,221 @@
-const express = require("express");
-const cvCtrl = require("../controllers/cv");
-const router = express.Router();
+const Personne = require("../models/person");
+const _ = require("lodash");
+const fs = require("fs");
+const path = require("path");
+const mongoose = require("mongoose");
 
-const isAuth = require("../middelware/is-auth");
+exports.getAllcandidats = async (req, res, next) => {
+  const filter = req.query.filter;
 
-// récupérer la liste de tous les Candidats
-router.get("/candidats", cvCtrl.getAllcandidats);
+  try {
+    const result = await Personne.find({
+      nom: new RegExp(filter, "i"), // insesible à la casse
+    });
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+exports.getCandidat = (req, res, next) => {
+  const pId = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "ID invalide" });
+  }
 
-// récupérer la liste de toutes les recrues
-router.get("/recrues", cvCtrl.getAllrecrues);
+  Personne.findById(pId)
+    .then((p) => {
+      if (!p) {
+        const error = new Error("Aucun candidat avec cet id n'existe");
+        error.statusCode = 404;
+        next(error);
+      }
+      res.status(200).json(p);
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+exports.createCandidat = (req, res, next) => {
+  let newP = _.pick(req.body, ["prenom", "nom", "age", "profession", "avatar"]);
 
-//récupérer les infos sur un SEUL Candidat
-router.get("/candidats/:id", cvCtrl.getCandidat);
+  newP.recrue = false;
 
-//création d'un nouveau Candidat sans token
-router.post("/candidats/free", cvCtrl.createCandidat);
+  const newPerson = new Personne(newP);
 
-//Update d'un Candidat sans token
-router.put("/candidats/free/:id", cvCtrl.updateCandidat);
+  newPerson
+    .save()
+    .then((result) => {
+      res.status(201).json({
+        message: "Candidat ajouté avec succès",
+        id: result["_id"].toString(),
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      next(err);
+    });
+};
+exports.updateCandidat = (req, res, next) => {
+  const pId = req.params["id"];
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "ID invalide" });
+  }
 
-//suppression d'un Candidat sans token
-router.delete("/candidats/free/:id", cvCtrl.deleteCandidat);
+  Personne.findById(pId)
+    .then((p) => {
+      if (!p) {
+        const error = new Error("Aucun candidat avec cet id n'existe");
+        error.statusCode = 404;
+        throw error;
+      }
 
-//création d'un nouveau Candidat
-router.post("/candidats", isAuth, cvCtrl.createCandidat);
+      p = _.merge(p, req.body);
 
-//Update d'un Candidat
-router.put("/candidats/v2", cvCtrl.updateCandidat2);
+      return p.save();
+    })
+    .then((result) => {
+      res.status(200).json({
+        message: "Candidat mis à jour avec succès",
+        result: result,
+      });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+exports.updateCandidat2 = (req, res, next) => {
+  let p = _.pick(req.body, ["prenom", "nom", "age", "profession", "avatar"]);
+  let newP = new Personne(p);
+  newP
+    .save()
+    .then((result) => {
+      res.status(200).json({
+        message: "Candidat mis à jour avec succès V2",
+        result: result,
+      });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+exports.recruterCandidat = (req, res, next) => {
+  const pId = req.params["id"];
 
-//Update d'un Candidat
-router.put("/candidats/:id", isAuth, cvCtrl.updateCandidat);
+  Personne.findById(pId)
+    .then((p) => {
+      if (!p) {
+        const error = new Error("Aucun candidat avec cet id n'existe");
+        error.statusCode = 404;
+        throw error;
+      }
+      console.log(p);
 
-//Ajouter un Candidat comme recrue
-router.patch("/candidats/ajouter-recrue/:id", cvCtrl.ajouterRecrue);
+      p = _.merge(p, req.body);
 
-//Virer une recrue
-router.patch("/candidats/virer-recrue/:id", cvCtrl.virerRecrue);
+      return p.save();
+    })
+    .then((result) => {
+      if (result["recrue"] == true)
+        res.status(200).json({
+          message: "Candidat recruté avec succès",
+          result: result,
+        });
+      else
+        res.status(200).json({
+          message: "Candidat remercié",
+          result: result,
+        });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+exports.ajouterRecrue = (req, res, next) => {
+  const pId = req.params["id"];
+  if (!mongoose.Types.ObjectId.isValid(pId)) {
+    return res.status(400).json({ message: "ID invalide" });
+  }
 
-//suppression d'un Candidat
-router.delete("/candidats/:id", isAuth, cvCtrl.deleteCandidat);
+  Personne.findById(pId)
+    .then((p) => {
+      if (!p) {
+        const error = new Error("Aucun candidat avec cet id n'existe");
+        error.statusCode = 404;
+        throw error;
+      }
 
-module.exports = router;
+      p.recrue = true;
+      return p.save();
+    })
+    .then((result) => {
+      res.status(200).json({
+        message: "Candidat recruté avec succès",
+        result: result,
+      });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+exports.virerRecrue = (req, res, next) => {
+  const pId = req.params["id"];
+  if (!mongoose.Types.ObjectId.isValid(pId)) {
+    return res.status(400).json({ message: "ID invalide" });
+  }
+
+  Personne.findById(pId)
+    .then((p) => {
+      if (!p) {
+        const error = new Error("Aucun candidat avec cet id n'existe");
+        error.statusCode = 404;
+        throw error;
+      }
+
+      p.recrue = false;
+      return p.save();
+    })
+    .then((result) => {
+      res.status(200).json({
+        message: "Recrue virée avec succès",
+        result: result,
+      });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+exports.getAllrecrues = async (req, res, next) => {
+  const filter = req.query.filter;
+
+  try {
+    const result = await Personne.find({
+      recrue: true, // insesible à la casse
+    });
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+exports.deleteCandidat = (req, res, next) => {
+  const pId = req.params["id"];
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "ID invalide" });
+  }
+
+  Personne.findByIdAndDelete(pId)
+    .then((p) => {
+      console.log(p);
+      if (!p) {
+        const error = new Error("Aucun candidat avec cet id n'existe");
+        error.statusCode = 404;
+        throw error;
+      }
+      res.status(200).json({
+        message: "Candidat supprimé avec succès",
+        result: p,
+      });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};

@@ -36,6 +36,10 @@ const Schema = mongoose.Schema; // const { Schema } = mongoose;
  *           type: string
  *           description: Avatar de l'utilisateur
  *           example : http://avatar.com/avatar.png
+ *         recrue:
+ *           type: boolean
+ *           description: Indique si le candidat est recruté
+ *           example : false
  *         createdAt:
  *           type: string
  *           format: date-time

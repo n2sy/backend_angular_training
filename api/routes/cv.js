@@ -26,6 +26,24 @@ const isAuth = require("../middelware/is-auth");
 router.get("/candidats", cvCtrl.getAllcandidats);
 
 // récupérer la liste de toutes les recrues
+/**
+ * @swagger
+ * /cv/recrues:
+ *   get:
+ *     summary: Récupère toutes les recrues
+ *     tags: [Recrues]
+ *     responses:
+ *       200:
+ *         description: Liste des recrues
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Person'
+ *       500:
+ *         description: Erreur interne du serveur
+ */
 router.get("/recrues", cvCtrl.getAllrecrues);
 
 //récupérer les infos sur un SEUL Candidat
@@ -251,8 +269,77 @@ router.put("/candidats/v2", cvCtrl.updateCandidat2);
  */
 router.put("/candidats/:id", isAuth, cvCtrl.updateCandidat);
 
-//Recruter ou non un Candidat
-router.patch("/candidats/recruter/:id", cvCtrl.recruterCandidat);
+//Ajouter un Candidat comme recrue
+/**
+ * @swagger
+ * /cv/candidats/ajouter-recrue/{id}:
+ *   patch:
+ *     summary: Ajouter un candidat comme recrue
+ *     tags: [Recrues]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID du candidat à recruter
+ *     responses:
+ *       200:
+ *         description: Candidat recruté avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Candidat recruté avec succès"
+ *                 result:
+ *                   $ref: '#/components/schemas/Person'
+ *       400:
+ *         description: ID invalide
+ *       404:
+ *         description: Candidat non trouvé
+ *       500:
+ *         description: Erreur interne du serveur
+ */
+router.patch("/candidats/ajouter-recrue/:id", cvCtrl.ajouterRecrue);
+
+//Virer une recrue
+/**
+ * @swagger
+ * /cv/candidats/virer-recrue/{id}:
+ *   patch:
+ *     summary: Virer une recrue (remettre comme simple candidat)
+ *     tags: [Recrues]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la recrue à virer
+ *     responses:
+ *       200:
+ *         description: Recrue virée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Recrue virée avec succès"
+ *                 result:
+ *                   $ref: '#/components/schemas/Person'
+ *       400:
+ *         description: ID invalide
+ *       404:
+ *         description: Candidat non trouvé
+ *       500:
+ *         description: Erreur interne du serveur
+ */
+router.patch("/candidats/virer-recrue/:id", cvCtrl.virerRecrue);
 
 //suppression d'un Candidat
 /**
